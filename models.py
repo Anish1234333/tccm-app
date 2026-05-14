@@ -1,15 +1,13 @@
-# models.py — HuggingFace Serverless Inference model registry
-# All models are free-tier accessible with a HF_TOKEN
-
 EXTRACTION_MODELS = {
-    "MiniLM": "microsoft/MiniLM-L12-H384-uncased",
-    "Zephyr-7B": "HuggingFaceH4/zephyr-7b-beta",
-    "Qwen2.5-7B": "Qwen/Qwen2.5-7B-Instruct",
+    "Llama-Groq": ("groq/llama-3.1-8b-instant", "GROQ_API_KEY"),
+    "Llama-Cerebras": ("cerebras/llama3.1-8b", "CEREBRAS_API_KEY"),
+    "Mistral-OR": (
+        "openrouter/mistralai/mistral-7b-instruct-v0.1:free",
+        "OPENROUTER_API_KEY",
+    ),
 }
+CONSOLIDATION_MODEL = ("groq/llama-3.3-70b-versatile", "GROQ_API_KEY")
 
-CONSOLIDATION_MODEL_ID = "microsoft/Phi-3.5-mini-instruct"
-
-# Shared inference settings
 MAX_NEW_TOKENS = 2048
-MAX_PAPER_CHARS = 12_000  # ~3 k tokens — fits every model's context window
-MAX_SHEETS_CHARS = 4_000  # per-sheet truncation for consolidation prompt
+MAX_PAPER_CHARS = 12_000
+MAX_SHEETS_CHARS = 4_000

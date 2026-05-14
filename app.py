@@ -2,7 +2,7 @@
 import os, json, tempfile
 import gradio as gr
 from prompts import THEORY_PROMPT, CHARACTERISTICS_PROMPT, METHOD_PROMPT
-from models import EXTRACTION_MODELS, CONSOLIDATION_MODEL_ID
+from models import EXTRACTION_MODELS, CONSOLIDATION_MODEL
 from agents.tccm_agent import tccm_graph
 from agents.council_agent import council_graph
 from utils.pdf_reader import load_papers, load_inventory
@@ -32,7 +32,7 @@ def _extract_one(pdfs, inventory_file, journal, prompt_type, model_name):
             "journal": journal,
             "inventory": inventory,
             "results": [],
-        }
+        }  # ty:ignore[invalid-argument-type]
     )
     return result["results"]
 
@@ -44,9 +44,9 @@ def run_council(pdfs, inventory_file, journal, prompt_type, progress=gr.Progress
     s2 = _extract_one(pdfs, inventory_file, journal, prompt_type, MODEL_NAMES[1])
     progress(0.68, desc=f"Extracting with {MODEL_NAMES[2]}…")
     s3 = _extract_one(pdfs, inventory_file, journal, prompt_type, MODEL_NAMES[2])
-    progress(0.85, desc=f"Consolidating with {CONSOLIDATION_MODEL_ID}…")
+    progress(0.85, desc=f"Consolidating with {CONSOLIDATION_MODEL}…")
     s4 = council_graph.invoke(
-        {"sheet1": s1, "sheet2": s2, "sheet3": s3, "consolidated": []}
+        {"sheet1": s1, "sheet2": s2, "sheet3": s3, "consolidated": []}  # ty:ignore[invalid-argument-type]
     )["consolidated"]
     progress(0.95, desc="Writing Excel…")
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False, prefix="tccm_") as f:
@@ -67,7 +67,7 @@ with gr.Blocks(title="Agentic TCCM Extractor — LLM Council") as demo:
     gr.Markdown(
         "# 📚 Agentic TCCM Extractor\n"
         f"**Council:** {MODEL_NAMES[0]} · {MODEL_NAMES[1]} · {MODEL_NAMES[2]} → "
-        f"**Consolidator:** `{CONSOLIDATION_MODEL_ID}`  ·  Set `HF_TOKEN` in Space secrets."
+        f"**Consolidator:** `{CONSOLIDATION_MODEL}`  ·  Set `HF_TOKEN` in Space secrets."
     )
     with gr.Row():
         with gr.Column(scale=1):
