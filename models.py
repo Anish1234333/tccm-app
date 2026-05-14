@@ -2,7 +2,7 @@
 # All models are free-tier accessible with a HF_TOKEN
 
 EXTRACTION_MODELS = {
-    "MiniLM": "microsoft/MiniLM-L12-H384-uncased",
+    "Mistral-7B": "mistralai/Mistral-7B-Instruct-v0.2",
     "Zephyr-7B": "HuggingFaceH4/zephyr-7b-beta",
     "Qwen2.5-7B": "Qwen/Qwen2.5-7B-Instruct",
 }
