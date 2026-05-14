@@ -44,7 +44,14 @@ def extract(state: PaperState) -> dict:
         provider=provider,                           # 👈 add this  # ty:ignore[invalid-argument-type]
         token=os.environ.get("HF_TOKEN", "")
     )
-    prompt = state["prompt_template"].format(...)
+    from string import Template
+
+    prompt = (
+        state["prompt_template"]
+        .replace("{paper_text}", state["paper"]["text"])
+        .replace("{inventory}", state.get("inventory", ""))
+        .replace("{journal}",   state.get("journal", "IS Journal"))
+    )
     resp = client.chat_completion(
         messages=[{"role": "user", "content": prompt}],
         model=model_id,                              # 👈 was state["model_id"]
