@@ -38,14 +38,14 @@ def consolidate(state: CouncilState) -> dict:
     try:
         parsed = json.loads(raw)
     except Exception:
-        parsed = [{"error": "consolidation_parse_failed", "raw": raw[:600]}]
+        parsed = [{"error": "consolidation_parse_failed", "raw": raw[:600]}]  # ty:ignore[not-subscriptable]
     return {"consolidated": parsed if isinstance(parsed, list) else [parsed]}
 
 
 # ── Compiled graph ───────────────────────────────────────────────────────────
 
 council_graph = (
-    StateGraph(CouncilState)
+    StateGraph(CouncilState)  # ty:ignore[invalid-argument-type]
     .add_node("consolidate", consolidate)
     .add_edge(START, "consolidate")
     .add_edge("consolidate", END)
