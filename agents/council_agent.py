@@ -2,9 +2,8 @@
 import os, json
 from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
-from huggingface_hub import InferenceClient
 from models import CONSOLIDATION_MODEL, MAX_NEW_TOKENS, MAX_SHEETS_CHARS
-
+import litellm
 
 # ── State schema ─────────────────────────────────────────────────────────────
 
@@ -19,26 +18,32 @@ class CouncilState(TypedDict):
 # ── Node ─────────────────────────────────────────────────────────────────────
 
 
-def consolidate(state: CouncilState) -> dict:
-    """Single responsibility: call consolidation LLM, return tagged rows."""
-    from prompts import CONSOLIDATION_PROMPT  # imported here to avoid circular
+def consolidate(state):
+    model_str, api_key_name = CONSOLIDATION_MODEL  # unpack tuple
+    from prompts import CONSOLIDATION_PROMPT
 
-    client = InferenceClient(token=os.environ.get("HF_TOKEN", ""))
     prompt = CONSOLIDATION_PROMPT.format(
         sheet1=json.dumps(state["sheet1"], indent=2)[:MAX_SHEETS_CHARS],
         sheet2=json.dumps(state["sheet2"], indent=2)[:MAX_SHEETS_CHARS],
         sheet3=json.dumps(state["sheet3"], indent=2)[:MAX_SHEETS_CHARS],
     )
-    resp = client.chat_completion(
+    resp = litellm.completion(
+        model=model_str,
         messages=[{"role": "user", "content": prompt}],
-        model=CONSOLIDATION_MODEL,
-        max_tokens=MAX_NEW_TOKENS * 2,
-    )  # ty:ignore[no-matching-overload]
+        max_tokens=MAX_NEW_TOKENS,
+        api_key=os.environ.get(api_key_name, ""),
+        fallbacks=[
+            {
+                "model": "cerebras/llama3.1-70b",
+                "api_key": os.environ.get("CEREBRAS_API_KEY", ""),
+            },
+        ],
+    )
     raw = resp.choices[0].message.content
     try:
-        parsed = json.loads(raw)  # ty:ignore[invalid-argument-type]
+        parsed = json.loads(raw)
     except Exception:
-        parsed = [{"error": "consolidation_parse_failed", "raw": raw[:600]}]  # ty:ignore[not-subscriptable]
+        parsed = [{"error": "consolidation_parse_failed", "raw": raw[:600]}]
     return {"consolidated": parsed if isinstance(parsed, list) else [parsed]}
 
 
