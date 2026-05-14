@@ -1,80 +1,54 @@
-# agents/tccm_agent.py  [WAIVER: none — well within 80-line ceiling]
 import os, json, operator
 from typing import TypedDict, Annotated
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
-from huggingface_hub import InferenceClient
+import litellm
 from models import MAX_NEW_TOKENS
 
-
-# ── State schemas ────────────────────────────────────────────────────────────
-
-
 class GraphState(TypedDict):
-    papers: list[dict]  # [{paper_id, text}, ...]
-    prompt_template: str  # fully-formatted RCTO prompt string (with {placeholders})
-    model_id: tuple[str, str]  # HF model repo id
-    journal: str
-    inventory: str  # 159-theory text, empty for Characteristics/Method
-    results: Annotated[list, operator.add]  # reducer accumulates
-
+    papers:          list[dict]
+    prompt_template: str
+    model_id:        tuple[str, str]   # (litellm model string, env key name)
+    journal:         str
+    inventory:       str
+    results:         Annotated[list, operator.add]
 
 class PaperState(TypedDict):
-    paper: dict
+    paper:           dict
     prompt_template: str
-    model_id: tuple[str, str]
-    journal: str
-    inventory: str
-    results: Annotated[list, operator.add]
-
-
-# ── Nodes ────────────────────────────────────────────────────────────────────
-
+    model_id:        tuple[str, str]
+    journal:         str
+    inventory:       str
+    results:         Annotated[list, operator.add]
 
 def dispatch(state: GraphState) -> list[Send]:
-    """Fan-out: one Send per paper — no for-loop in agent logic."""
-    return [
-        Send("extract", {**state, "paper": p, "results": []}) for p in state["papers"]
-    ]
-
+    return [Send("extract", {**state, "paper": p, "results": []}) for p in state["papers"]]
 
 def extract(state: PaperState) -> dict:
-    model_id, provider = state["model_id"]          # 👈 unpack here
-    client = InferenceClient(
-        provider=provider,                           # 👈 add this  # ty:ignore[invalid-argument-type]
-        token=os.environ.get("HF_TOKEN", "")
-    )
-    from string import Template
-
+    model_str, api_key_name = state["model_id"]
+    
     prompt = (
         state["prompt_template"]
         .replace("{paper_text}", state["paper"]["text"])
-        .replace("{inventory}", state.get("inventory", ""))
-        .replace("{journal}",   state.get("journal", "IS Journal"))
+        .replace("{inventory}",  state.get("inventory", ""))
+        .replace("{journal}",    state.get("journal", "IS Journal"))
     )
-    resp = client.chat_completion(
+
+    resp = litellm.completion(
+        model=model_str,
         messages=[{"role": "user", "content": prompt}],
-        model=model_id,                              # 👈 was state["model_id"]
         max_tokens=MAX_NEW_TOKENS,
+        api_key=os.environ.get(api_key_name, ""),
     )
     raw = resp.choices[0].message.content
     try:
         parsed = json.loads(raw)
     except Exception:
-        parsed = [
-            {
-                "paper_id": state["paper"]["paper_id"],
-                "raw_output": raw[:800],
-                "parse_error": True,
-            }
-        ]
+        parsed = [{"paper_id": state["paper"]["paper_id"], "raw_output": raw[:800], "parse_error": True}]
     return {"results": parsed if isinstance(parsed, list) else [parsed]}
 
-
-# ── Compiled graph ───────────────────────────────────────────────────────────
-
 tccm_graph = (
-    StateGraph(GraphState)
+    StateGraph(GraphState)  # ty:ignore[invalid-argument-type]
     .add_node("extract", extract)
     .add_conditional_edges(START, dispatch, ["extract"])
     .add_edge("extract", END)

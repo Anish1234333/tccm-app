@@ -3,7 +3,7 @@ import os, json
 from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from huggingface_hub import InferenceClient
-from models import CONSOLIDATION_MODEL_ID, MAX_NEW_TOKENS, MAX_SHEETS_CHARS
+from models import CONSOLIDATION_MODEL, MAX_NEW_TOKENS, MAX_SHEETS_CHARS
 
 
 # ── State schema ─────────────────────────────────────────────────────────────
@@ -31,9 +31,9 @@ def consolidate(state: CouncilState) -> dict:
     )
     resp = client.chat_completion(
         messages=[{"role": "user", "content": prompt}],
-        model=CONSOLIDATION_MODEL_ID,
+        model=CONSOLIDATION_MODEL,
         max_tokens=MAX_NEW_TOKENS * 2,
-    )
+    )  # ty:ignore[no-matching-overload]
     raw = resp.choices[0].message.content
     try:
         parsed = json.loads(raw)  # ty:ignore[invalid-argument-type]
