@@ -1,0 +1,125 @@
+Annexure A — Inventory of 159 IS Theories
+The list below is the canonical reference inventory of named IS theories to be
+uploaded into NotebookLM as IS_Theories.xlsx alongside the 100 paper PDFs.
+The file is enclosed with this guidance note. Theories are listed alphabetically by
+name; the S.No. column matches the spreadsheet for cross-reference. The list is
+a reference, not a ceiling — students must flag any theory found in their corpus
+that is not on this inventory.
+S.No. — Theory Name S.No. — Theory Name
+1. Absorptive capacity theory 81. Organizational knowledge creation
+2. Activity Theory 82. Organizational learning theory
+3. Actor network theory 83. Platform Ecosystem Theory
+4. Accountability theory 84. Portfolio theory
+5. Adaptive structuration theory 85. Privacy Calculus Theory
+6. Administrative behavior, theory of 86. Process virtualization theory
+7. Adaptive enterprise architecture
+theory
+87. People-Process-Data-Technology
+Framework
+8. Affordance-actualization Theory 88. Prospect theory
+9. Agency theory 89. Protection motivation theory
+10. Appraisal Theory 90. Psychological ownership framework
+11. Argumentation theory 91. Punctuated equilibrium theory
+12. Attachment-Theory 92. Rational Choice Theory
+13. Behavioral decision theory 93. Real options theory
+14. Belief Action Outcome Framework 94. Representation Theory
+15. Big Five Model of Personality 95. Resource-based view of the firm
+16. Boundary object theory 96. Resource dependency theory
+17. Chaos theory 97. Resource Orchestration Theory
+18. Cognitive dissonance theory 98. Role Theory
+19. Cognitive fit theory 99. Selective organizational information
+privacy and security violations model
+(SOIPSVM)
+Page 20 of 27Student Guidance Note — TCCM & Topic Modelling
+S.No. — Theory Name S.No. — Theory Name
+20. Cognitive load theory 100. Self determination theory
+21. Community Of Practice Theory 101. Self-efficacy theory
+22. Competitive strategy (Porter) 102. Self Presentation Theory
+23. Complexity theory 103. Semantic theory of survey response
+24. Compliance regulatory theory 104. SERVQUAL
+25. Conservation of resources theory 105. Signaling theory
+26. Contingency theory 106. Social Bond Theory
+27. Critical Mass Theory of Interactive
+Media
+107. Social capital theory
+28. Critical realism theory 108. Social cognitive theory
+29. Critical social theory 109. Social Comparison Theory
+30. Critical success factors, theory of 110. Social Contagion Theory
+31. Customer based Discrepancy Theory 111. Socioemotional Selectivity Theory
+32. Customer Focus Theory 112. Social exchange theory
+33. CYNEFIN framework 113. Social Identity Theory
+34. Deferred action, theory of 114. Social Influence Theory (of Kelman)
+35. Delone and McLean IS success
+model
+115. Social Information Processing
+Theory (of Walther)
+36. Design Theory 116. Social learning theory
+37. Diffusion of innovations theory 117. Social media engagement theory
+38. Distributed Cognition Theory 118. Social network theory
+39. Dynamic capabilities 119. Social Penetration Theory
+40. Elaboration likelihood model 120. Social Presence Theory
+41. Embodied social presence theory 121. Social shaping of technology
+42. Equity theory 122. Sociomaterialism Theory
+43. Evolutionary theory 123. Socio-technical theory
+44. Expectation confirmation theory 124. Soft systems theory
+45. Feminism theory 125. Speech and Act Theory
+46. Fit-Viability theory 126. Stakeholder theory
+Page 21 of 27Student Guidance Note — TCCM & Topic Modelling
+S.No. — Theory Name S.No. — Theory Name
+47. Flow theory 127. Structuration theory
+48. Game theory 128. Structured process modeling theory
+(SPMT)
+49. Garbage can theory 129. Success Management Theory
+50. General systems theory 130. Task closure theory
+51. General deterrence theory 131. Task-technology fit
+52. General Strain theory 132. Team resilience theory
+53. Goal Contagion Theory 133. Technological frames of reference
+54. Governance, Risk and Compliance 134. Technology acceptance model
+55. Hedonic-motivation system adoption
+model (HMSAM)
+135. Technology affordances and
+constraints theory
+56. Hermeneutics 136. Technology dominance, theory of
+57. Illusion of control 137. Technology-organization-
+environment framework
+58. Impression management, theory of 138. Technology Threat Avoidance
+Theory
+59. Information processing theory 139. Theory of collective action
+60. Information warfare 140. Theory of Hypercompetition
+61. Institutional theory 141. Theory of Interactive Media Effects
+(TIME)
+62. International information systems
+theory
+142. Theory of Interpersonal Behavior
+63. Internationalization Theory 143. Theory of organizational creativity
+64. Innovation Resistance Theory 144. Theory of Organizational
+Sensemaking
+65. Keller's Motivational Model 145. Theory of planned behavior
+66. Kohlberg's theory of Moral
+Development
+146. Theory of reasoned action
+67. Knowledge-based theory of the firm 147. Theory of slack resources
+68. Knowledge Security Theory 148. Theory of swift trust
+69. Language action perspective 149. Theory of Network Externalities
+Page 22 of 27Student Guidance Note — TCCM & Topic Modelling
+S.No. — Theory Name S.No. — Theory Name
+70. Information asymmetry theory (lemon
+market)
+150. Transaction cost economics
+71. Management fashion theory 151. Transactive memory theory
+72. Media richness theory 152. Uncanny Valley Theory
+73. Media synchronicity theory 153. Uncertainty Reduction Theory
+74. Modal aspects, theory of 154. Unified theory of acceptance and
+use of technology
+75. Multi-attribute utility theory 155. Upper Echelons Theory
+76. Multi-motive information systems
+continuance model (MISC)
+156. Usage control model
+77. Norm Activation Theory 157. Value Theory
+78. Organizational Ambidexterity Theory 158. Work systems theory
+79. Organizational culture theory 159. Yield shift theory of satisfaction
+80. Organizational information
+processing theory
+Source: Compiled from the IS research methods literature for use in this course.
+The file IS_Theories.xlsx (enclosed) contains the same list in spreadsheet form
+for direct upload to any LLM used in the Council.

@@ -1,0 +1,125 @@
+Annexure B — Agentic AI Programming
+Guidelines (Mandatory)
+B.1 The principle
+An agentic AI submission is a thin declarative orchestration around LLM calls —
+not a 500-line Python script with one LLM call buried inside it. The LLM is the
+reasoning engine; your code is the wiring. If your submission ratio is 99% Python,
+1% LLM, you have not built an agent — you have built a script with an LLM
+cameo. The rules below enforce that discipline. They apply to every executable
+artefact in the M3 and M4 submissions: the TCCM extraction agent, the topic-
+modelling agent, the LLM Council consolidator, the Bayesian optimiser, and the
+Gradio UI.
+B.2 Forbidden patterns
+• No `if/elif/else` for content decisions. If you are deciding what counts as
+a theory, what category a paper belongs to, or whether a cluster label is
+plausible — that is the LLM's job. Encode it in the prompt, not in a Python
+conditional.
+• No `for` / `while` loops for agent work. Iteration over papers, clusters,
+or Bayesian trials happens via LangGraph's `Send` API (fan-out) and
+conditional edges. Loops are permitted only for trivially mechanical I/O —
+reading a directory listing, walking a JSON tree.
+• No HTML, no CSS, no JavaScript. All user interfaces are Gradio
+components. If you find yourself writing `<div>`, `style=`, or `.css` files you
+are wasting time that belongs in the prompt.
+• No 500-line scripts with a single LLM call. If your `.py` file is over 200
+lines and contains one `llm.invoke(...)` line, the code is procedural Python
+wearing an LLM costume. Refactor.
+B.3 Mandated patterns
+Page 24 of 27Student Guidance Note — TCCM & Topic Modelling
+• LangGraph is mandatory for every agent. Define a `StateGraph` with
+typed state, register node functions, connect with edges, call `.compile()`.
+The compiled graph is what your Gradio UI invokes — nothing else.
+• Each node has a single responsibility — call an LLM, run a tool, or
+update state. Nodes do not contain business logic; they call LLMs that
+contain the logic.
+• Branching = conditional edges. Replace `if x: do_a() else: do_b()` with
+`graph.add_conditional_edges(node, router, {'a': node_a, 'b': node_b})`.
+The `router` lambda is the only place branching is permitted and must be
+a single expression.
+• Iteration = `Send` fan-out + reducer. To process 100 papers, emit 100
+`Send` events from a dispatcher node; each is processed in parallel; an
+accumulating reducer aggregates them into state. There is no `for paper
+in papers:` anywhere.
+• Gradio Blocks for every UI. `gr.Tabs` for the four Council sheets,
+`gr.Dataframe` for tabular outputs, `gr.JSON` for structured returns,
+`gr.Plot` for HDBSCAN visualisations. Zero HTML.
+B.4 Code-volume ceilings
+Submissions exceeding these ceilings without a documented justification lose
+marks. Justification must appear as a comment in the file (`# WAIVER: library X
+forces …`).
+Artefact Hard ceiling (lines of Python)
+TCCM extraction agent (Theory +
+Characteristics prompts wired through
+LangGraph)
+≤ 80
+Topic-modelling agent (SPECTER-2 →
+UMAP → HDBSCAN orchestration)
+≤ 120
+Bayesian optimiser node (optuna / scikit-
+optimize wrapper)
+≤ 60
+LLM Council consolidator (3 sheets in, Sheet
+4 out, Triple/Two/Single tagging)
+≤ 60
+Page 25 of 27Student Guidance Note — TCCM & Topic Modelling
+Artefact Hard ceiling (lines of Python)
+Gradio UI (all four sheets + agent invocation
++ clustering viz)
+≤ 100
+B.5 Anti-pattern vs pattern
+The two code blocks below extract theories from a corpus. Both are functionally
+similar. One is forbidden; the other is required.
+ANTI-PATTERN — procedural Python with an LLM cameo (DO NOT SUBMIT)
+papers = load_papers("./papers/")
+results = []
+for paper in papers: # forbidden loop
+if paper["type"] == "empirical": # forbidden branch
+prompt = EMPIRICAL_PROMPT
+elif paper["type"] == "conceptual":
+prompt = CONCEPTUAL_PROMPT
+else:
+prompt = DEFAULT_PROMPT
+if len(paper["text"]) > 50000: # forbidden branch
+paper["text"] = paper["text"][:50000]
+output = llm.invoke(prompt + paper["text"])
+if "NO CONSTRUCTS" not in output: # forbidden branch
+results.append(parse_output(output))
+# ... and 400 more lines like this ...
+PATTERN — LangGraph + one unified prompt (THIS IS THE TARGET)
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import Send
+from typing import TypedDict, Annotated
+import operator
+class State(TypedDict):
+papers: list[dict]
+results: Annotated[list, operator.add] # reducer accumulates
+def dispatch(state: State):
+return [Send("extract", {"paper": p}) for p in state["papers"]]
+def extract(state):
+out = llm.invoke(UNIFIED_RCTO_PROMPT, state["paper"])
+return {"results": [out]} # reducer handles append
+graph = (
+StateGraph(State)
+.add_node("extract", extract)
+.add_conditional_edges(START, dispatch, ["extract"])
+Page 26 of 27Student Guidance Note — TCCM & Topic Modelling
+.add_edge("extract", END)
+.compile()
+)
+# Gradio UI invokes the compiled graph — no loops, no branches.
+gr.Interface(fn=graph.invoke, inputs=gr.File(file_count="multiple"),
+outputs=gr.Dataframe()).launch()
+B.6 Submission inspection
+Faculty will run a static check across your submission directory. The following
+patterns trigger an automatic flag:
+• `if ` or `elif ` outside a one-line conditional-edge routing lambda.
+• `for ` or `while ` outside file-system or JSON traversal.
+• Any HTML tag, inline `style=`, or `.css` / `.js` file in the submission tree.
+• Any single Python file exceeding 200 lines.
+• Absence of `langgraph` in `requirements.txt` or `from langgraph` in the
+entry-point file.
+One flag → comment in feedback. Two flags → revise and resubmit. Three flags
+→ zero on the agentic component. The point of this annexure is not to constrain
+creativity but to redirect it: the cleverness should be in the prompt and the graph,
+not in hand-coded Python control flow that an LLM could have decided in one
+inference call.
