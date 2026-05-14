@@ -32,7 +32,7 @@ def _extract_one(pdfs, inventory_file, journal, prompt_type, model_name):
             "journal": journal,
             "inventory": inventory,
             "results": [],
-        }
+        }  # ty:ignore[invalid-argument-type]
     )
     return result["results"]
 
@@ -46,7 +46,7 @@ def run_council(pdfs, inventory_file, journal, prompt_type, progress=gr.Progress
     s3 = _extract_one(pdfs, inventory_file, journal, prompt_type, MODEL_NAMES[2])
     progress(0.85, desc=f"Consolidating with {CONSOLIDATION_MODEL_ID}…")
     s4 = council_graph.invoke(
-        {"sheet1": s1, "sheet2": s2, "sheet3": s3, "consolidated": []}
+        {"sheet1": s1, "sheet2": s2, "sheet3": s3, "consolidated": []}  # ty:ignore[invalid-argument-type]
     )["consolidated"]
     progress(0.95, desc="Writing Excel…")
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False, prefix="tccm_") as f:

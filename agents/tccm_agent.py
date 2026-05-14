@@ -13,7 +13,7 @@ from models import MAX_NEW_TOKENS
 class GraphState(TypedDict):
     papers: list[dict]  # [{paper_id, text}, ...]
     prompt_template: str  # fully-formatted RCTO prompt string (with {placeholders})
-    model_id: str  # HF model repo id
+    model_id: tuple[str, str]  # HF model repo id
     journal: str
     inventory: str  # 159-theory text, empty for Characteristics/Method
     results: Annotated[list, operator.add]  # reducer accumulates
@@ -22,7 +22,7 @@ class GraphState(TypedDict):
 class PaperState(TypedDict):
     paper: dict
     prompt_template: str
-    model_id: str
+    model_id: tuple[str, str]
     journal: str
     inventory: str
     results: Annotated[list, operator.add]
@@ -39,16 +39,15 @@ def dispatch(state: GraphState) -> list[Send]:
 
 
 def extract(state: PaperState) -> dict:
-    """Single responsibility: call LLM, parse JSON, return result list."""
-    client = InferenceClient(token=os.environ.get("HF_TOKEN", ""))
-    prompt = state["prompt_template"].format(
-        paper_text=state["paper"]["text"],
-        inventory=state.get("inventory", ""),
-        journal=state.get("journal", "IS Journal"),
+    model_id, provider = state["model_id"]          # 👈 unpack here
+    client = InferenceClient(
+        provider=provider,                           # 👈 add this  # ty:ignore[invalid-argument-type]
+        token=os.environ.get("HF_TOKEN", "")
     )
+    prompt = state["prompt_template"].format(...)
     resp = client.chat_completion(
         messages=[{"role": "user", "content": prompt}],
-        model=state["model_id"],
+        model=model_id,                              # 👈 was state["model_id"]
         max_tokens=MAX_NEW_TOKENS,
     )
     raw = resp.choices[0].message.content

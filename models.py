@@ -2,9 +2,9 @@
 # All models are free-tier accessible with a HF_TOKEN
 
 EXTRACTION_MODELS = {
-    "Mistral-7B": "mistralai/Mistral-7B-Instruct-v0.2",
-    "Zephyr-7B": "HuggingFaceH4/zephyr-7b-beta",
-    "Qwen2.5-7B": "Qwen/Qwen2.5-7B-Instruct",
+    "Mistral-7B": ("mistralai/Mistral-7B-Instruct-v0.2", "featherless-ai"),
+    "Zephyr-7B":  ("HuggingFaceH4/zephyr-7b-beta",       "hf-inference"),
+    "Qwen2.5-7B": ("Qwen/Qwen2.5-7B-Instruct",           "novita"),
 }
 
 CONSOLIDATION_MODEL_ID = "microsoft/Phi-3.5-mini-instruct"
