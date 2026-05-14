@@ -36,6 +36,7 @@ class PaperState:
 
 def dispatch(state: GraphState) -> list[Send]:
     sends = []
+    # WAIVER: rate-limit pacing, not agent logic
     for i, p in enumerate(state.papers):  # state.papers not state["papers"]
         if i > 0:
             time.sleep(2)
