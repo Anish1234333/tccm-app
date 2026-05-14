@@ -39,6 +39,11 @@ def extract(state: PaperState) -> dict:
         messages=[{"role": "user", "content": prompt}],
         max_tokens=MAX_NEW_TOKENS,
         api_key=os.environ.get(api_key_name, ""),
+        fallbacks=[
+            {"model": "cerebras/llama3.1-8b", "api_key": os.environ.get("CEREBRAS_API_KEY", "")},
+            {"model": "openrouter/qwen/qwen-2.5-7b-instruct:free", "api_key": os.environ.get("OPENROUTER_API_KEY", "")},
+        ],
+        num_retries=3,
     )
     raw = resp.choices[0].message.content
     try:
