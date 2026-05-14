@@ -4,8 +4,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-_HEADER_FILL  = PatternFill("solid", fgColor="1F4E79")
-_HEADER_FONT  = Font(bold=True, color="FFFFFF")
+_HEADER_FILL = PatternFill("solid", fgColor="1F4E79")
+_HEADER_FONT = Font(bold=True, color="FFFFFF")
 _SHEET_TITLES = [
     "Sheet1-Model1",
     "Sheet2-Model2",
@@ -26,7 +26,7 @@ def _fill_sheet(ws, df: pd.DataFrame, title: str) -> None:
     ws.append(list(df.columns))
     for cell in ws[1]:
         cell.fill = _HEADER_FILL
-        cell.font  = _HEADER_FONT
+        cell.font = _HEADER_FONT
     for row in df.itertuples(index=False):
         ws.append(list(row))
     for i in range(1, len(df.columns) + 1):

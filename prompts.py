@@ -124,7 +124,9 @@ Output ONLY a valid JSON array. No preamble, no markdown fences. Each object:
 """
 
 
-def get_prompt(prompt_type: str, journal: str, paper_text: str, inventory: str = "") -> str:
+def get_prompt(
+    prompt_type: str, journal: str, paper_text: str, inventory: str = ""
+) -> str:
     """Build the full prompt for a given type, substituting journal and paper content."""
     text = paper_text[:12000]  # Fit within 7B model context windows
     templates = {
@@ -135,5 +137,7 @@ def get_prompt(prompt_type: str, journal: str, paper_text: str, inventory: str =
     return templates[prompt_type].format(
         journal=journal or "[Journal Name]",
         paper_text=text,
-        inventory=inventory[:3000] if inventory else "See IS_Theories.xlsx (not uploaded)"
+        inventory=inventory[:3000]
+        if inventory
+        else "See IS_Theories.xlsx (not uploaded)",
     )

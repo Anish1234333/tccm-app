@@ -21,6 +21,7 @@ def load_papers(pdf_paths: list[str]) -> list[dict]:
 def load_inventory(inventory_path: str) -> str:
     if inventory_path.endswith(".xlsx"):
         import pandas as pd
+
         df = pd.read_excel(inventory_path)
         return df.to_string(index=False)[:3_000]
     with open(inventory_path, "r", encoding="utf-8") as f:
