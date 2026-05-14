@@ -21,8 +21,15 @@ class PaperState(TypedDict):
     inventory:       str
     results:         Annotated[list, operator.add]
 
+import time
+
 def dispatch(state: GraphState) -> list[Send]:
-    return [Send("extract", {**state, "paper": p, "results": []}) for p in state["papers"]]
+    sends = []
+    for i, p in enumerate(state["papers"]):
+        if i > 0:
+            time.sleep(2)   # 2s between each paper dispatch
+        sends.append(Send("extract", {**state, "paper": p, "results": []}))
+    return sends
 
 def extract(state: PaperState) -> dict:
     model_str, api_key_name = state["model_id"]
