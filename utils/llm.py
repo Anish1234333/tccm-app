@@ -83,13 +83,18 @@ def call_llm(
                 num_retries=1,
                 timeout=120,
             )
-            log.warning("✓ SUCCESS on %s (slot %d/%d)", model_str, idx + 1, len(pool))  # 👈
+            log.warning(
+                "✓ SUCCESS on %s (slot %d/%d)", model_str, idx + 1, len(pool)
+            )  # 👈
             return resp.choices[0].message.content
 
         except _RETRIABLE as exc:
             log.warning(
                 "Rate-limited on %s (slot %d/%d): %s — trying next slot",
-                model_str, idx + 1, len(pool), exc,
+                model_str,
+                idx + 1,
+                len(pool),
+                exc,
             )
             last_exc = exc
             if idx < len(pool) - 1:
@@ -97,9 +102,12 @@ def call_llm(
             continue
 
         except Exception as exc:
-            log.warning(                                                                   # 👈
+            log.warning(  # 👈
                 "Hard error on %s (slot %d/%d): %s — trying next slot",
-                model_str, idx + 1, len(pool), exc,
+                model_str,
+                idx + 1,
+                len(pool),
+                exc,
             )
             last_exc = exc
             continue
