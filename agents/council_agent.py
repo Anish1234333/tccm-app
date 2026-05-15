@@ -1,21 +1,19 @@
 # agents/council_agent.py  [WAIVER: none — well within 60-line ceiling]
 import os
 import json
-from typing import Annotated
+from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from models import CONSOLIDATION_MODEL, MAX_NEW_TOKENS, MAX_SHEETS_CHARS
 import litellm
-import operator
-from dataclasses import dataclass, field
+
 # ── State schema ─────────────────────────────────────────────────────────────
 
 
-@dataclass
-class CouncilState:
+class CouncilState(TypedDict):
     sheet1: list
     sheet2: list
     sheet3: list
-    consolidated: Annotated[list, operator.add] = field(default_factory=list)
+    consolidated: list
 
 
 # ── Node ─────────────────────────────────────────────────────────────────────
@@ -53,7 +51,7 @@ def consolidate(state):
 # ── Compiled graph ───────────────────────────────────────────────────────────
 
 council_graph = (
-    StateGraph(CouncilState)
+    StateGraph(CouncilState)  # ty:ignore[invalid-argument-type]
     .add_node("consolidate", consolidate)
     .add_edge(START, "consolidate")
     .add_edge("consolidate", END)
