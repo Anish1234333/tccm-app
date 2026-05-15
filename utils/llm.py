@@ -13,7 +13,6 @@ from litellm.exceptions import (
     RateLimitError,
     ServiceUnavailableError,
     APIConnectionError,
-    APIError,
 )
 
 from models import FALLBACK_CHAIN, MAX_NEW_TOKENS
