@@ -11,4 +11,5 @@ dependencies = [
     "pandas>=3.0.3",
     "litellm>=1.84.0",
     "pymupdf>=1.27.2.3",
+    "huggingface-hub>=1.14.0",
 ]
