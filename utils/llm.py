@@ -71,46 +71,35 @@ def call_llm(
     messages: list[dict],
     max_tokens: int = MAX_NEW_TOKENS,
 ) -> str:
-    """
-    Iterate through pool trying each (model, key) pair.
-    Returns the response text on first success.
-    Raises RuntimeError if every slot fails.
-    """
     last_exc: Exception = RuntimeError("Pool was empty")
 
     for idx, (model_str, api_key) in enumerate(pool):
         try:
-            log.debug("Trying %s (slot %d/%d)", model_str, idx + 1, len(pool))
             resp = litellm.completion(
                 model=model_str,
                 messages=messages,
                 max_tokens=max_tokens,
                 api_key=api_key,
-                num_retries=1,  # one quick internal retry before we move on
+                num_retries=1,
                 timeout=120,
             )
+            log.warning("✓ SUCCESS on %s (slot %d/%d)", model_str, idx + 1, len(pool))  # 👈
             return resp.choices[0].message.content
 
         except _RETRIABLE as exc:
             log.warning(
                 "Rate-limited on %s (slot %d/%d): %s — trying next slot",
-                model_str,
-                idx + 1,
-                len(pool),
-                exc,
+                model_str, idx + 1, len(pool), exc,
             )
             last_exc = exc
             if idx < len(pool) - 1:
-                time.sleep(0.5)  # tiny breath before next provider
+                time.sleep(0.5)
             continue
 
         except Exception as exc:
-            log.warning(
-                "Error on %s (slot %d/%d): %s — trying next slot",
-                model_str,
-                idx + 1,
-                len(pool),
-                exc,
+            log.warning(                                                                   # 👈
+                "Hard error on %s (slot %d/%d): %s — trying next slot",
+                model_str, idx + 1, len(pool), exc,
             )
             last_exc = exc
             continue
