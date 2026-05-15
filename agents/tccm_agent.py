@@ -1,68 +1,49 @@
 import os
 import json
 import operator
-
-# from typing import TypedDict, Annotated
-from typing import Annotated
+from typing import TypedDict, Annotated
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
 import litellm
 from models import MAX_NEW_TOKENS
 import time
 
-# tccm_agent.py
-from dataclasses import dataclass, field
 
-
-@dataclass
-class GraphState:
+class GraphState(TypedDict):
     papers: list[dict]
     prompt_template: str
-    model_id: tuple[str, str]
+    model_id: tuple[str, str]  # (litellm model string, env key name)
     journal: str
     inventory: str
-    results: Annotated[list, operator.add] = field(default_factory=list)
+    results: Annotated[list, operator.add]
 
 
-@dataclass
-class PaperState:
+class PaperState(TypedDict):
     paper: dict
     prompt_template: str
     model_id: tuple[str, str]
     journal: str
     inventory: str
-    results: Annotated[list, operator.add] = field(default_factory=list)
+    results: Annotated[list, operator.add]
 
 
 def dispatch(state: GraphState) -> list[Send]:
     sends = []
-    # WAIVER: rate-limit pacing, not agent logic
-    for i, p in enumerate(state.papers):  # state.papers not state["papers"]
+    for i, p in enumerate(state["papers"]):
         if i > 0:
-            time.sleep(2)
-        sends.append(
-            Send(
-                "extract",
-                PaperState(  # construct PaperState explicitly
-                    paper=p,
-                    prompt_template=state.prompt_template,
-                    model_id=state.model_id,
-                    journal=state.journal,
-                    inventory=state.inventory,
-                    results=[],
-                ),
-            )
-        )
+            time.sleep(2)  # 2s between each paper dispatch
+        sends.append(Send("extract", {**state, "paper": p, "results": []}))
     return sends
 
 
 def extract(state: PaperState) -> dict:
-    model_str, api_key_name = state.model_id
+    model_str, api_key_name = state["model_id"]
 
     prompt = (
-        state.prompt_template.replace("{paper_text}", state.paper["text"])
-        .replace("{inventory}", state.inventory or "")
-        .replace("{journal}", state.journal or "IS Journal")
+        state["prompt_template"]
+        .replace("{paper_text}", state["paper"]["text"])
+        .replace("{inventory}", state.get("inventory", ""))
+        .replace("{journal}", state.get("journal", "IS Journal"))
     )
 
     resp = litellm.completion(
@@ -88,7 +69,7 @@ def extract(state: PaperState) -> dict:
     except Exception:
         parsed = [
             {
-                "paper_id": state.paper["paper_id"],
+                "paper_id": state["paper"]["paper_id"],
                 "raw_output": raw[:800],
                 "parse_error": True,
             }
@@ -97,7 +78,7 @@ def extract(state: PaperState) -> dict:
 
 
 tccm_graph = (
-    StateGraph(GraphState)
+    StateGraph(GraphState)  # ty:ignore[invalid-argument-type]
     .add_node("extract", extract)
     .add_conditional_edges(START, dispatch, ["extract"])
     .add_edge("extract", END)

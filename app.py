@@ -33,7 +33,7 @@ def _extract_one(pdfs, inventory_file, journal, prompt_type, model_name):
             journal=journal,
             inventory=inventory,
             results=[],
-        )
+        )  # ty:ignore[invalid-argument-type]
     )
     return result["results"]
 
