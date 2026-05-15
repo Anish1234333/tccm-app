@@ -47,7 +47,7 @@ def run_council(pdfs, inventory_file, journal, prompt_type, progress=gr.Progress
     s3 = _extract_one(pdfs, inventory_file, journal, prompt_type, MODEL_NAMES[2])
     progress(0.85, desc=f"Consolidating with {CONSOLIDATION_MODEL}…")
     s4 = council_graph.invoke(
-        CouncilState(sheet1=s1, sheet2=s2, sheet3=s3, consolidated=[])
+        CouncilState(sheet1=s1, sheet2=s2, sheet3=s3, consolidated=[])  # ty:ignore[invalid-argument-type]
     )["consolidated"]
     progress(0.95, desc="Writing Excel…")
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False, prefix="tccm_") as f:

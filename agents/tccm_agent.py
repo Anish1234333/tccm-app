@@ -1,43 +1,50 @@
-import os
+# agents/tccm_agent.py
 import json
 import operator
 from typing import TypedDict, Annotated
+
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
-import litellm
+
 from models import MAX_NEW_TOKENS
-import time
+from utils.llm import build_pool, call_llm
+
+
+# ── State schemas ─────────────────────────────────────────────────────────────
 
 
 class GraphState(TypedDict):
     papers: list[dict]
     prompt_template: str
-    model_id: tuple[str, str]  # (litellm model string, env key name)
+    model_id: tuple[str, list[str]]  # (model_str, key_env_var_list)
     journal: str
     inventory: str
-    results: Annotated[list, operator.add]
+    results: Annotated[list, operator.add]  # reducer accumulates
 
 
 class PaperState(TypedDict):
     paper: dict
     prompt_template: str
-    model_id: tuple[str, str]
+    model_id: tuple[str, list[str]]
     journal: str
     inventory: str
     results: Annotated[list, operator.add]
 
 
+# ── Nodes ─────────────────────────────────────────────────────────────────────
+
+
 def dispatch(state: GraphState) -> list[Send]:
-    sends = []
-    for i, p in enumerate(state["papers"]):
-        if i > 0:
-            time.sleep(2)  # 2s between each paper dispatch
-        sends.append(Send("extract", {**state, "paper": p, "results": []}))
-    return sends
+    """Fan-out: one Send per paper, no throttling needed — pool handles retries."""
+    return [
+        Send("extract", {**state, "paper": p, "results": []}) for p in state["papers"]
+    ]
 
 
 def extract(state: PaperState) -> dict:
-    model_str, api_key_name = state["model_id"]
+    """Single responsibility: call LLM via pool, parse JSON, return result list."""
+    primary_model, primary_keys = state["model_id"]
+    pool = build_pool(primary_model, primary_keys)
 
     prompt = (
         state["prompt_template"]
@@ -46,24 +53,12 @@ def extract(state: PaperState) -> dict:
         .replace("{journal}", state.get("journal", "IS Journal"))
     )
 
-    resp = litellm.completion(
-        model=model_str,
+    raw = call_llm(
+        pool,
         messages=[{"role": "user", "content": prompt}],
         max_tokens=MAX_NEW_TOKENS,
-        api_key=os.environ.get(api_key_name, ""),
-        fallbacks=[
-            {
-                "model": "cerebras/llama3.1-8b",
-                "api_key": os.environ.get("CEREBRAS_API_KEY", ""),
-            },
-            {
-                "model": "openrouter/qwen/qwen-2.5-7b-instruct:free",
-                "api_key": os.environ.get("OPENROUTER_API_KEY", ""),
-            },
-        ],
-        num_retries=3,
     )
-    raw = resp.choices[0].message.content
+
     try:
         parsed = json.loads(raw)
     except Exception:
@@ -74,8 +69,11 @@ def extract(state: PaperState) -> dict:
                 "parse_error": True,
             }
         ]
+
     return {"results": parsed if isinstance(parsed, list) else [parsed]}
 
+
+# ── Compiled graph ────────────────────────────────────────────────────────────
 
 tccm_graph = (
     StateGraph(GraphState)  # ty:ignore[invalid-argument-type]
