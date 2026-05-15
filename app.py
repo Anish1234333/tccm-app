@@ -1,10 +1,11 @@
 # app.py  [WAIVER: none — well within 100-line ceiling]
-import os, json, tempfile
+import json
+import tempfile
 import gradio as gr
 from prompts import THEORY_PROMPT, CHARACTERISTICS_PROMPT, METHOD_PROMPT
 from models import EXTRACTION_MODELS, CONSOLIDATION_MODEL
-from agents.tccm_agent import tccm_graph
-from agents.council_agent import council_graph
+from agents.tccm_agent import tccm_graph, GraphState
+from agents.council_agent import council_graph, CouncilState
 from utils.pdf_reader import load_papers, load_inventory
 from utils.excel_writer import export_excel
 
@@ -25,14 +26,14 @@ def _extract_one(pdfs, inventory_file, journal, prompt_type, model_name):
     papers = load_papers([p.name for p in pdfs]) if pdfs else []
     inventory = load_inventory(inventory_file.name) if inventory_file else ""
     result = tccm_graph.invoke(
-        {
-            "papers": papers,
-            "prompt_template": PROMPT_MAP[prompt_type],
-            "model_id": EXTRACTION_MODELS[model_name],
-            "journal": journal,
-            "inventory": inventory,
-            "results": [],
-        }  # ty:ignore[invalid-argument-type]
+        GraphState(
+            papers=papers,
+            prompt_template=PROMPT_MAP[prompt_type],
+            model_id=EXTRACTION_MODELS[model_name],
+            journal=journal,
+            inventory=inventory,
+            results=[],
+        )
     )
     return result["results"]
 
@@ -46,7 +47,7 @@ def run_council(pdfs, inventory_file, journal, prompt_type, progress=gr.Progress
     s3 = _extract_one(pdfs, inventory_file, journal, prompt_type, MODEL_NAMES[2])
     progress(0.85, desc=f"Consolidating with {CONSOLIDATION_MODEL}…")
     s4 = council_graph.invoke(
-        {"sheet1": s1, "sheet2": s2, "sheet3": s3, "consolidated": []}  # ty:ignore[invalid-argument-type]
+        CouncilState(sheet1=s1, sheet2=s2, sheet3=s3, consolidated=[])
     )["consolidated"]
     progress(0.95, desc="Writing Excel…")
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False, prefix="tccm_") as f:
