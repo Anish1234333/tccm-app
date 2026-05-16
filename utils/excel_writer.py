@@ -3,6 +3,7 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
+import json
 
 _HEADER_FILL = PatternFill("solid", fgColor="1F4E79")
 _HEADER_FONT = Font(bold=True, color="FFFFFF")
@@ -18,7 +19,15 @@ def _to_df(results: list) -> pd.DataFrame:
     rows = []
     for item in results:
         (rows.extend(item) if isinstance(item, list) else rows.append(item))
-    return pd.DataFrame(rows) if rows else pd.DataFrame({"note": ["No data"]})
+    if not rows:
+        return pd.DataFrame({"note": ["No data"]})
+    df = pd.DataFrame(rows)
+    # stringify any cell that's still a list/dict
+    for col in df.columns:
+        df[col] = df[col].apply(
+            lambda v: json.dumps(v) if isinstance(v, (list, dict)) else v
+        )
+    return df
 
 
 def _fill_sheet(ws, df: pd.DataFrame, title: str) -> None:

@@ -10,6 +10,4 @@ app_file: app.py
 pinned: false
 ---
 
-# My Space
-
 TCCM App which mgmt prof wanted, with council of agents
