@@ -14,7 +14,7 @@ FALLBACK_CHAIN: list[tuple[str, list[str]]] = [
     ("groq/llama-3.1-8b-instant", GROQ_KEYS),
     ("cerebras/llama3.1-8b", CEREBRAS_KEYS),
     ("mistral/mistral-small-latest", MISTRAL_KEYS),
-    ("sambanova/Meta-Llama-3.1-8B-Instruct", SAMBANOVA_KEYS),
+    ("sambanova/Meta-Llama-3.3-70B-Instruct", SAMBANOVA_KEYS),
 ]
 
 # ── Extraction council — each model has a preferred primary ───────────────────
